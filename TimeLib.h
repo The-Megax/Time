@@ -7,6 +7,28 @@
               - fixed  daysToTime_t macro (thanks maniacbug)
 */     
 
+/**
+ ******************************************************************************
+ * @file    spark_wiring_time.h
+ * @author  Satish Nair
+ * @version V1.0.0
+ * @date    3-March-2014
+ * @brief   Header for spark_wiring_time.cpp module
+ ******************************************************************************
+  Copyright (c) 2013-2015 Particle Industries, Inc.  All rights reserved.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation, either
+  version 3 of the License, or (at your option) any later version.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************
+ */
+
 #ifndef _Time_h
 #ifdef __cplusplus
 #define _Time_h
@@ -14,6 +36,8 @@
 #include <inttypes.h>
 #ifndef __AVR__
 #include <sys/types.h> // for __time_t_defined, but avr libc lacks sys/types.h
+#include <sys/time.h>
+#include <ctime>
 #endif
 
 
@@ -34,23 +58,9 @@ extern "C++" {
 typedef enum {timeNotSet, timeNeedsSync, timeSet
 }  timeStatus_t ;
 
-typedef enum {
-    dowInvalid, dowSunday, dowMonday, dowTuesday, dowWednesday, dowThursday, dowFriday, dowSaturday
-} timeDayOfWeek_t;
 
-typedef enum {
-    tmSecond, tmMinute, tmHour, tmWday, tmDay,tmMonth, tmYear, tmNbrFields
-} tmByteFields;	   
-
-typedef struct  { 
-  uint8_t Second; 
-  uint8_t Minute; 
-  uint8_t Hour; 
-  uint8_t Wday;   // day of week, sunday is day 1
-  uint8_t Day;
-  uint8_t Month; 
-  uint8_t Year;   // offset from 1970; 
-} 	tmElements_t, TimeElements, *tmElementsPtr_t;
+extern const char* TIME_FORMAT_DEFAULT;
+extern const char* TIME_FORMAT_ISO8601_FULL;
 
 //convenience macros to convert to and from tm years 
 #define  tmYearToCalendar(Y) ((Y) + 1970)  // full four digit year 
@@ -94,50 +104,98 @@ typedef time_t(*getExternalTime)();
 #define daysToTime_t    ((D)) ( (D) * SECS_PER_DAY) // fixed on Jul 22 2011
 #define weeksToTime_t   ((W)) ( (W) * SECS_PER_WEEK)   
 
-/*============================================================================*/
-/*  time and date functions   */
-int     hour();            // the hour now 
-int     hour(time_t t);    // the hour for the given time
-int     hourFormat12();    // the hour now in 12 hour format
-int     hourFormat12(time_t t); // the hour for the given time in 12 hour format
-uint8_t isAM();            // returns true if time now is AM
-uint8_t isAM(time_t t);    // returns true the given time is AM
-uint8_t isPM();            // returns true if time now is PM
-uint8_t isPM(time_t t);    // returns true the given time is PM
-int     minute();          // the minute now 
-int     minute(time_t t);  // the minute for the given time
-int     second();          // the second now 
-int     second(time_t t);  // the second for the given time
-int     day();             // the day now 
-int     day(time_t t);     // the day for the given time
-int     weekday();         // the weekday now (Sunday is day 1) 
-int     weekday(time_t t); // the weekday for the given time 
-int     month();           // the month now  (Jan is month 1)
-int     month(time_t t);   // the month for the given time
-int     year();            // the full four digit year: (2009, 2010 etc) 
-int     year(time_t t);    // the year for the given time
-
-time_t now();              // return the current time as seconds since Jan 1 1970 
-void    setTime(time_t t);
-void    setTime(int hr,int min,int sec,int day, int month, int yr);
-void    adjustTime(long adjustment);
-
-/* date strings */ 
 #define dt_MAX_STRING_LEN 9 // length of longest date string (excluding terminating null)
-char* monthStr(uint8_t month);
-char* dayStr(uint8_t day);
-char* monthShortStr(uint8_t month);
-char* dayShortStr(uint8_t day);
-	
-/* time sync functions	*/
-timeStatus_t timeStatus(); // indicates if time has been set and recently synchronized
-void    setSyncProvider( getExternalTime getTimeFunction); // identify the external time provider
-void    setSyncInterval(time_t interval); // set the number of seconds between re-sync
 
-/* low level functions to convert to and from system time                     */
-void breakTime(time_t time, tmElements_t &tm);  // break time_t into elements
-time_t makeTime(const tmElements_t &tm);  // convert time elements into time_t
+class TimeClass {
+public:
+    TimeClass() {
+    }
 
+    /*============================================================================*/
+    /*  time and date functions   */
+    static int     hour();            // the hour now 
+    static int     hour(time_t t);    // the hour for the given time
+    static int     hourFormat12();    // the hour now in 12 hour format
+    static int     hourFormat12(time_t t); // the hour for the given time in 12 hour format
+    static uint8_t isAM();            // returns true if time now is AM
+    static uint8_t isAM(time_t t);    // returns true the given time is AM
+    static uint8_t isPM();            // returns true if time now is PM
+    static uint8_t isPM(time_t t);    // returns true the given time is PM
+    static int     minute();          // the minute now 
+    static int     minute(time_t t);  // the minute for the given time
+    static int     second();          // the second now 
+    static int     second(time_t t);  // the second for the given time
+    static int     day();             // the day now 
+    static int     day(time_t t);     // the day for the given time
+    static int     weekday();         // the weekday now (Sunday is day 1) 
+    static int     weekday(time_t t); // the weekday for the given time 
+    static int     month();           // the month now  (Jan is month 1)
+    static int     month(time_t t);   // the month for the given time
+    static int     year();            // the full four digit year: (2009, 2010 etc) 
+    static int     year(time_t t);    // the year for the given time
+
+    static time_t now();              // return the current time as seconds since Jan 1 1970 
+    static void    setTime(time_t t);
+    static void    setTime(int hr,int min,int sec,int day, int month, int yr);
+    static void    adjustTime(long adjustment);
+
+    /* date strings */ 
+    static char* monthStr(uint8_t month);
+    static char* dayStr(uint8_t day);
+    static char* monthShortStr(uint8_t month);
+    static char* dayShortStr(uint8_t day);
+      
+    /* time sync functions	*/
+    static timeStatus_t timeStatus(); // indicates if time has been set and recently synchronized
+    static void    setSyncProvider( getExternalTime getTimeFunction); // identify the external time provider
+    static void    setSyncInterval(time_t interval); // set the number of seconds between re-sync
+
+    static void refreshCache(time_t t);
+
+    /* low level functions to convert to and from system time                     */
+    static void breakTime(time_t time, tm &tme);  // break time_t into elements
+    static time_t makeTime(const tm &tme);  // convert time elements into time_t
+
+    /* return string representation of the current time */
+    inline const char* timeStr()
+    {
+      return timeStr(now());
+    }
+
+    /* return string representation for the given time */
+    static const char* timeStr(time_t t);
+
+    /**
+     * Return a string representation of the given time using strftime().
+     * This function takes several kilobytes of flash memory so it's kept separate
+     * from `timeStr()` to reduce memory footprint for applications that don't use
+     * alternative time formats.
+     *
+     * @param t
+     * @param format_spec
+     * @return
+     */
+    const char* format(time_t t, const char* format_spec=NULL);
+
+    inline const char* format(const char* format_spec=NULL)
+    {
+        return format(now(), format_spec);
+    }
+
+    void setFormat(const char* format)
+    {
+        this->format_spec = format;
+    }
+
+    const char* getFormat() const { return format_spec; }
+
+private:
+    static struct tm _tm;
+    static const char* format_spec;
+    static const char* timeFormatImpl(tm* calendar_time, const char* format, int time_zone);
+};
+
+extern TimeClass Time;
 } // extern "C++"
 #endif // __cplusplus
 #endif /* _Time_h */

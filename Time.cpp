@@ -384,6 +384,10 @@ const char* TimeClass::format(time_t t, const char* format_spec)
     return timeFormatImpl(&calendar_time, format_spec, time_zone_cache + dst_current_cache);
 }
 
+#ifndef t_abs
+#define t_abs(x) ((x)>0?(x):-(x))
+#endif
+
 const char* TimeClass::timeFormatImpl(tm* calendar_time, const char* format, int time_zone)
 {
     char format_str[64];
@@ -398,7 +402,7 @@ const char* TimeClass::timeFormatImpl(tm* calendar_time, const char* format, int
         strcpy(time_zone_str, "Z");
     }
     else {
-        snprintf(time_zone_str, sizeof(time_zone_str), "%+03d:%02u", time_zone/3600, abs(time_zone/60)%60);
+        snprintf(time_zone_str, sizeof(time_zone_str), "%+03d:%02u", time_zone/3600, t_abs(time_zone/60)%60);
     }
 
     // replace %z with the timezone

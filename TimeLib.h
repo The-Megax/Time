@@ -157,13 +157,13 @@ public:
     static time_t makeTime(const tm &tme);  // convert time elements into time_t
 
     /* return string representation of the current time */
-    inline const char* timeStr()
+    inline String timeStr()
     {
       return timeStr(now());
     }
 
     /* return string representation for the given time */
-    static const char* timeStr(time_t t);
+    static String timeStr(time_t t);
 
     /**
      * Return a string representation of the given time using strftime().
@@ -175,9 +175,9 @@ public:
      * @param format_spec
      * @return
      */
-    const char* format(time_t t, const char* format_spec=NULL);
+    String format(time_t t, const char* format_spec=NULL);
 
-    inline const char* format(const char* format_spec=NULL)
+    inline String format(const char* format_spec=NULL)
     {
         return format(now(), format_spec);
     }
@@ -192,7 +192,7 @@ public:
 private:
     static struct tm _tm;
     static const char* format_spec;
-    static const char* timeFormatImpl(tm* calendar_time, const char* format, int time_zone);
+    static String timeFormatImpl(tm* calendar_time, const char* format, int time_zone);
 };
 
 extern TimeClass Time;

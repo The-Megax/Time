@@ -353,7 +353,7 @@ time_t dst_cache = 3600;        // a cache of the DST offset that was set (defau
 time_t dst_current_cache = 0;   // a cache of the DST offset currently being applied
 
 /* return string representation for the given time */
-const char* TimeClass::timeStr(time_t t)
+String TimeClass::timeStr(time_t t)
 {
     t += time_zone_cache;
     t += dst_current_cache;
@@ -363,13 +363,13 @@ const char* TimeClass::timeStr(time_t t)
     asctime_r(&calendar_time, ascstr);
     int len = strlen(ascstr);
     ascstr[len-1] = 0; // remove final newline
-    return String(ascstr).c_str();
+    return String(ascstr);
 }
 
 const char* TimeClass::format_spec = TIME_FORMAT_DEFAULT;
 struct tm TimeClass::_tm;
 
-const char* TimeClass::format(time_t t, const char* format_spec)
+String TimeClass::format(time_t t, const char* format_spec)
 {
     if (format_spec == nullptr)
         format_spec = this->format_spec;
@@ -388,7 +388,7 @@ const char* TimeClass::format(time_t t, const char* format_spec)
 #define t_abs(x) ((x)>0?(x):-(x))
 #endif
 
-const char* TimeClass::timeFormatImpl(tm* calendar_time, const char* format, int time_zone)
+String TimeClass::timeFormatImpl(tm* calendar_time, const char* format, int time_zone)
 {
     char format_str[64];
     // only copy up to n-1 to dest if no null terminator found
@@ -419,6 +419,6 @@ const char* TimeClass::timeFormatImpl(tm* calendar_time, const char* format, int
 
     char buf[50] = {};
     strftime(buf, sizeof(buf), format_str, calendar_time);
-    return String(buf).c_str();
+    return String(buf);
 }
 
